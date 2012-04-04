@@ -16,11 +16,9 @@ public class GravityModel implements IBouncingBallsModel {
         this.areaWidth = width;
         this.areaHeight = height;
 
-        x = 1;
-        y = 1;
+        addBall(new Ball(1, 1, 1));
         // vx = 2.3;
         // vy = 1;
-        r = 1;
     }
 
     /**
@@ -30,10 +28,15 @@ public class GravityModel implements IBouncingBallsModel {
      * @return the balls as shape objects
      */
     public List<Ellipse2D> getBalls() {
-        List<Ellipse2D> myBalls = new LinkedList<Ellipse2D>();
-        myBalls.add(new Ellipse2D.Double(x - r, y - r, 2 * r, 2 * r));
-        return myBalls;
-        // return balls;
+        List<Ellipse2D> l = new LinkedList<Ellipse2D>();
+        for (Ball b : balls) {
+            l.add(b.getEllipse());
+        }
+        return l;
+    }
+    
+    public void addBall(Ball b) {
+        balls.add(b);
     }
 
     /**
