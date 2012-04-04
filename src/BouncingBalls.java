@@ -14,7 +14,7 @@ import java.util.List;
  * 
  */
 @SuppressWarnings("serial")
-public final class BouncingBalls extends Animator implements MouseListener {
+public final class BouncingBalls extends Animator {
 
     private static final double PIXELS_PER_METER = 30;
 
@@ -26,7 +26,7 @@ public final class BouncingBalls extends Animator implements MouseListener {
     @Override
     public void init() {
         super.init();
-        addMouseListener(this);
+        addMouseListener(new MouseClickBallAdder());
         double modelWidth = canvasWidth / PIXELS_PER_METER;
         modelHeight = canvasHeight / PIXELS_PER_METER;
         model = new DummyModel(modelWidth, modelHeight);
@@ -61,38 +61,4 @@ public final class BouncingBalls extends Animator implements MouseListener {
         deltaT = 1 / fps;
     }
 
-    @Override
-    public void mouseClicked(MouseEvent event) {
-        System.out.println("X:" + event.getX() + ", Y:" + event.getY());
-        py = event.getY();
-        px = event.getX();
-
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent arg0) {
-        System.out.println("1");
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void mouseExited(MouseEvent arg0) {
-        System.out.println("2");
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void mousePressed(MouseEvent arg0) {
-        System.out.println("3");
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent arg0) {
-        // TODO Auto-generated method stub
-        System.out.println("4");
-    }
 }
