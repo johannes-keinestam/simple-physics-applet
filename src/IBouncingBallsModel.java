@@ -25,4 +25,6 @@ public interface IBouncingBallsModel {
 	 *            the amount of time to simulate
 	 */
 	public void tick(double deltaT);
+
+	public void addBall();
 }

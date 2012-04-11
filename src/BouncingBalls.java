@@ -14,7 +14,7 @@ import java.util.List;
  * 
  */
 @SuppressWarnings("serial")
-public final class BouncingBalls extends Animator {
+public final class BouncingBalls extends Animator implements MouseListener {
 
     private static final double PIXELS_PER_METER = 30;
 
@@ -26,7 +26,7 @@ public final class BouncingBalls extends Animator {
     @Override
     public void init() {
         super.init();
-        addMouseListener(new MouseClickBallAdder());
+        addMouseListener(this);
         double modelWidth = canvasWidth / PIXELS_PER_METER;
         modelHeight = canvasHeight / PIXELS_PER_METER;
         model = new DummyModel(modelWidth, modelHeight);
@@ -60,5 +60,16 @@ public final class BouncingBalls extends Animator {
         // Update deltaT according to new frame rate
         deltaT = 1 / fps;
     }
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		model.addBall();
+	}
+
+	/** Unused implemented methods */
+	public void mouseEntered(MouseEvent e) {}
+	public void mouseExited(MouseEvent e) {}
+	public void mousePressed(MouseEvent e) {}
+	public void mouseReleased(MouseEvent e) {}
 
 }

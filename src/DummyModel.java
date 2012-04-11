@@ -37,4 +37,7 @@ public class DummyModel implements IBouncingBallsModel {
 		myBalls.add(new Ellipse2D.Double(x - r, y - r, 2 * r, 2 * r));
 		return myBalls;
 	}
+
+	@Override
+	public void addBall() {	}
 }
