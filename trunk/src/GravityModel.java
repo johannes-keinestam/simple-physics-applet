@@ -35,6 +35,10 @@ public class GravityModel implements IBouncingBallsModel {
         return l;
     }
     
+	public void addBall() {
+		addBall(new Ball(1, 2.3, 1));
+	}
+    
     public void addBall(Ball b) {
         balls.add(b);
     }
@@ -51,4 +55,5 @@ public class GravityModel implements IBouncingBallsModel {
 
         // }
     }
+
 }
