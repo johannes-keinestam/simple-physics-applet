@@ -14,45 +14,45 @@ import java.util.List;
 @SuppressWarnings("serial")
 public final class BouncingBalls extends Animator {
 
-	private static final double PIXELS_PER_METER = 30;
+    private static final double PIXELS_PER_METER = 30;
 
-	private IBouncingBallsModel model;
-	private double modelHeight;
-	private double deltaT;
-	private int px, py;
+    private IBouncingBallsModel model;
+    private double modelHeight;
+    private double deltaT;
+    private int px, py;
 
-	@Override
-	public void init() {
-		super.init();
-		double modelWidth = canvasWidth / PIXELS_PER_METER;
-		modelHeight = canvasHeight / PIXELS_PER_METER;
-		//model = new DummyModel(modelWidth, modelHeight);
-		model = new GravityModel(modelWidth, modelHeight);
-		canvas.addKeyListener(new AddBallKeyListener(model));
-	}
+    @Override
+    public void init() {
+        super.init();
+        double modelWidth = canvasWidth / PIXELS_PER_METER;
+        modelHeight = canvasHeight / PIXELS_PER_METER;
+        // model = new DummyModel(modelWidth, modelHeight);
+        model = new GravityModel(modelWidth, modelHeight);
+        canvas.addKeyListener(new AddBallKeyListener(model));
+    }
 
-	@Override
-	protected void drawFrame(Graphics2D g) {
-		// Clear the canvas
-		g.setColor(Color.WHITE);
-		g.fillRect(0, 0, canvasWidth, canvasHeight);
-		// Update the model
-		model.tick(deltaT);
-		List<Ellipse2D> balls = model.getBalls();
-		// Transform balls to fit canvas
-		g.setColor(Color.RED);
-		g.scale(PIXELS_PER_METER, -PIXELS_PER_METER);
-		g.translate(0, -modelHeight);
-		for (Ellipse2D b : balls) {
-			g.fill(b);
-		}
-	}
+    @Override
+    protected void drawFrame(Graphics2D g) {
+        // Clear the canvas
+        g.setColor(Color.WHITE);
+        g.fillRect(0, 0, canvasWidth, canvasHeight);
+        // Update the model
+        model.tick(deltaT);
+        List<Ellipse2D> balls = model.getBalls();
+        // Transform balls to fit canvas
+        g.setColor(Color.RED);
+        g.scale(PIXELS_PER_METER, -PIXELS_PER_METER);
+        g.translate(0, -modelHeight);
+        for (Ellipse2D b : balls) {
+            g.fill(b);
+        }
+    }
 
-	@Override
-	protected void setFrameRate(double fps) {
-		super.setFrameRate(fps);
-		// Update deltaT according to new frame rate
-		deltaT = 1 / fps;
-	}
+    @Override
+    protected void setFrameRate(double fps) {
+        super.setFrameRate(fps);
+        // Update deltaT according to new frame rate
+        deltaT = 1 / fps;
+    }
 
 }
