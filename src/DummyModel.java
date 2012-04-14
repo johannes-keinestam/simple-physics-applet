@@ -39,5 +39,6 @@ public class DummyModel implements IBouncingBallsModel {
 	}
 
 	@Override
-	public void addBall() {	}
+	public void addBall() {
+	}
 }

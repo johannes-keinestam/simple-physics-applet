@@ -28,7 +28,7 @@ public abstract class Animator extends JApplet {
 	private volatile Thread animationThread;
 	protected int canvasWidth;
 	protected int canvasHeight;
-	private Canvas canvas;
+	protected Canvas canvas;
 	private BufferStrategy buffer;
 
 	protected abstract void drawFrame(Graphics2D g);
