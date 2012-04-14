@@ -1,5 +1,6 @@
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.util.List;
 
@@ -40,9 +41,19 @@ public final class BouncingBalls extends Animator {
         model.tick(deltaT);
         List<Ellipse2D> balls = model.getBalls();
         // Transform balls to fit canvas
-        g.setColor(Color.RED);
+        g.setColor(Color.GREEN);
         g.scale(PIXELS_PER_METER, -PIXELS_PER_METER);
         g.translate(0, -modelHeight);
+        
+        if (balls.size() == 2) {
+            Area a1 = new Area(balls.get(0));
+            Area a2 = new Area(balls.get(1));
+            a1.intersect(a2);
+            if (!a1.isEmpty()) {
+                g.setColor(Color.RED);
+            }
+        }
+        
         for (Ellipse2D b : balls) {
             g.fill(b);
         }
