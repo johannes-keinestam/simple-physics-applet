@@ -21,7 +21,6 @@ public class AddBallKeyListener implements KeyListener {
         if (currTime > (lastBallTime + ADD_BALL_LIMIT_MS)
                 && key == KeyEvent.VK_SPACE) {
             lastBallTime = currTime;
-            System.out.println("Ball added");
             model.addBall();
         }
     }

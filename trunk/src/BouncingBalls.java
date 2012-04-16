@@ -20,7 +20,6 @@ public final class BouncingBalls extends Animator {
     private IBouncingBallsModel model;
     private double modelHeight;
     private double deltaT;
-    private int px, py;
 
     @Override
     public void init() {
