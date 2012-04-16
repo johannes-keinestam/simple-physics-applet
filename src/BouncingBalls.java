@@ -1,8 +1,15 @@
 import java.awt.Color;
+import java.awt.Frame;
 import java.awt.Graphics2D;
+import java.awt.Label;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
+import java.util.Collections;
 import java.util.List;
+
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 
 /**
  * Extends Animator with capability to draw a bouncing balls model.
@@ -17,7 +24,7 @@ public final class BouncingBalls extends Animator {
 
     private static final double PIXELS_PER_METER = 30;
 
-    private IBouncingBallsModel model;
+    private GravityModel model;
     private double modelHeight;
     private double deltaT;
 
@@ -29,6 +36,14 @@ public final class BouncingBalls extends Animator {
         // model = new DummyModel(modelWidth, modelHeight);
         model = new GravityModel(modelWidth, modelHeight);
         canvas.addKeyListener(new AddBallKeyListener(model));
+        
+        JOptionPane.showMessageDialog(this.getContentPane(), 
+                "<html>" +
+                "Controls:<br><br>" +
+                "Add new ball - SPACEBAR<br>" +
+                "Toggle collision highlighting - C<br>" +
+                "Clear all balls - DELETE<br>" +
+                "</html>");
     }
 
     @Override
@@ -38,23 +53,18 @@ public final class BouncingBalls extends Animator {
         g.fillRect(0, 0, canvasWidth, canvasHeight);
         // Update the model
         model.tick(deltaT);
-        List<Ellipse2D> balls = model.getBalls();
         // Transform balls to fit canvas
         g.setColor(Color.GREEN);
         g.scale(PIXELS_PER_METER, -PIXELS_PER_METER);
         g.translate(0, -modelHeight);
-        
-        if (balls.size() == 2) {
-            Area a1 = new Area(balls.get(0));
-            Area a2 = new Area(balls.get(1));
-            a1.intersect(a2);
-            if (!a1.isEmpty()) {
+
+        List<Ball> balls = Collections.synchronizedList(model.getBalls());;        
+        for (Ball b : balls) {
+            if (model.isCollisionHighlighting() && model.intersects(b)) {
                 g.setColor(Color.RED);
             }
-        }
-        
-        for (Ellipse2D b : balls) {
-            g.fill(b);
+            g.fill(b.getEllipse());
+            g.setColor(Color.GREEN);
         }
     }
 

@@ -15,7 +15,7 @@ public interface IBouncingBallsModel {
      * 
      * @return the balls as shape objects
      */
-    public List<Ellipse2D> getBalls();
+    public List<Ball> getBalls();
 
     /**
      * Changes the state of the model using the Euler method by simulating
