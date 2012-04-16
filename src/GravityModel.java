@@ -1,3 +1,4 @@
+import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -37,7 +38,39 @@ public class GravityModel implements IBouncingBallsModel {
     }
 
     public void addBall(Ball b) {
-        balls.add(b);
+        if (!intersects(b)) {
+            balls.add(b);
+            System.out.println("Ball added");
+        } else {
+            System.err.println("Could not add ball!");
+        }
+    }
+    
+    /**
+     * Checks whether the two specified balls intersect.
+     * 
+     * @param b1
+     * @param b2
+     * @return
+     */
+    public boolean intersects(Ball b1, Ball b2) {
+        Area a1 = new Area(b1.getEllipse());
+        Area a2 = new Area(b2.getEllipse());
+        a1.intersect(a2);
+        return !a1.isEmpty();
+    }
+    
+    /**
+     * Checks whether specified ball intersects with any other ball.
+     * 
+     * @param b
+     * @return
+     */
+    public boolean intersects(Ball b) {
+        for (Ball b2 : balls) {
+            if (intersects(b, b2)) return true; 
+        } 
+        return false;
     }
 
     /**
