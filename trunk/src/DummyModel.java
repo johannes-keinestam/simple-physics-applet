@@ -32,10 +32,11 @@ public class DummyModel implements IBouncingBallsModel {
     }
 
     @Override
-    public List<Ellipse2D> getBalls() {
-        List<Ellipse2D> myBalls = new LinkedList<Ellipse2D>();
-        myBalls.add(new Ellipse2D.Double(x - r, y - r, 2 * r, 2 * r));
-        return myBalls;
+    public List<Ball> getBalls() {
+        List<Ball> balls = new LinkedList<Ball>();
+        Ball b = new Ball(r, vx, vy);
+        balls.add(b);
+        return balls;
     }
 
     @Override

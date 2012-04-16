@@ -9,6 +9,7 @@ public class GravityModel implements IBouncingBallsModel {
     private final double areaHeight;
     private final List<Ball> balls = Collections
             .synchronizedList(new LinkedList<Ball>());
+    private boolean collisionHighlighting = false;
 
     public GravityModel(double width, double height) {
         this.areaWidth = width;
@@ -25,12 +26,8 @@ public class GravityModel implements IBouncingBallsModel {
      * 
      * @return the balls as shape objects
      */
-    public List<Ellipse2D> getBalls() {
-        List<Ellipse2D> l = new LinkedList<Ellipse2D>();
-        for (Ball b : balls) {
-            l.add(b.getEllipse());
-        }
-        return l;
+    public List<Ball> getBalls() {
+        return new LinkedList<Ball>(balls);
     }
 
     public void addBall() {
@@ -54,10 +51,14 @@ public class GravityModel implements IBouncingBallsModel {
      * @return
      */
     public boolean intersects(Ball b1, Ball b2) {
-        Area a1 = new Area(b1.getEllipse());
-        Area a2 = new Area(b2.getEllipse());
-        a1.intersect(a2);
-        return !a1.isEmpty();
+        if (b1 == b2) {
+            return false;
+        } else {
+            Area a1 = new Area(b1.getEllipse());
+            Area a2 = new Area(b2.getEllipse());
+            a1.intersect(a2);
+            return !a1.isEmpty();
+        }
     }
     
     /**
@@ -92,6 +93,18 @@ public class GravityModel implements IBouncingBallsModel {
             b.x += b.vx * deltaT;
             b.y += b.vy * deltaT;
         }
+    }
+    
+    public boolean isCollisionHighlighting() {
+        return collisionHighlighting;
+    }
+
+    public void setCollisionHighlighting(boolean collisionHighlighting) {
+        this.collisionHighlighting = collisionHighlighting;
+    }
+    
+    public void clearBalls() {
+        balls.clear();
     }
 
 }
