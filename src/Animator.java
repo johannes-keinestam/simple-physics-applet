@@ -1,6 +1,12 @@
+import java.awt.BorderLayout;
 import java.awt.Canvas;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Graphics2D;
+import java.awt.Label;
+import java.awt.LayoutManager;
+import java.awt.Panel;
+import java.awt.TextField;
 import java.awt.image.BufferStrategy;
 
 import javax.swing.JApplet;
@@ -29,6 +35,7 @@ public abstract class Animator extends JApplet {
     protected int canvasWidth;
     protected int canvasHeight;
     protected Canvas canvas;
+    protected BallAddPanel ballAddPanel;
     private BufferStrategy buffer;
 
     protected abstract void drawFrame(Graphics2D g);
@@ -36,14 +43,25 @@ public abstract class Animator extends JApplet {
     @Override
     public void init() {
         Dimension appletDimension = getSize();
-        canvasWidth = appletDimension.width;
-        canvasHeight = appletDimension.height;
         setFrameRate(MAX_FRAMERATE);
+        
+        LayoutManager layout = new BorderLayout();
+        setLayout(layout);
+        
+        ballAddPanel = new BallAddPanel();
+        add(ballAddPanel, BorderLayout.SOUTH);
+
         // Set up animation tools
         canvas = new Canvas();
         canvas.setIgnoreRepaint(true);
+        canvasWidth = appletDimension.width;
+        canvasHeight = appletDimension.height-32;
         canvas.setSize(canvasWidth, canvasHeight);
-        add(canvas);
+
+        add(canvas, BorderLayout.CENTER);
+        //add(canvas);
+        //add(new Label("biyatch"));
+        
         // Set up double buffer
         canvas.createBufferStrategy(2);
         buffer = canvas.getBufferStrategy();

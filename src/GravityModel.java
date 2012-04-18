@@ -33,16 +33,18 @@ public class GravityModel implements IBouncingBallsModel {
         return new LinkedList<Ball>(balls);
     }
 
-    public void addBall() {
-        addBall(new Ball(1, areaWidth*0.4, areaHeight*0.8, 1, 0, 1));
+    public boolean addBall() {
+        return addBall(new Ball(1, areaWidth*0.4, areaHeight*0.8, 1, 0, 1));
     }
 
-    public void addBall(Ball b) {
+    public boolean addBall(Ball b) {
         if (intersects(b) == null) {
             balls.add(b);
             System.out.println("Ball added");
+            return true;
         } else {
             System.err.println("Could not add ball!");
+            return false;
         }
     }
     
