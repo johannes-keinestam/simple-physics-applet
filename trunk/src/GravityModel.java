@@ -119,6 +119,17 @@ public class GravityModel implements IBouncingBallsModel {
                 double theta1 = Math.atan2(b2.y - b1.y, b2.x - b1.x) * 180 / Math.PI;
                 double theta2 = Math.atan2(b1.y - b2.y, b1.x - b2.x) * 180 / Math.PI;
                 
+                // TODO initial speed vector, using some kind of rectToPolar 
+                double u1 = 10; double u2 = 12;
+                double m1 = 2.5/*b1.mass*/; double m2 = 5.7/*b2.mass*/;
+                                
+                double I = m1*u1 + m2*u2;
+                double R = -1*(u2-u1);
+                
+                double v1 = (u1*(m1-m2) + 2*m2*u2)/(m1+m2);
+                double v2 = (u2*(m2-m1) + 2*m1*u1)/(m1+m2);
+                
+                System.out.println("V1="+v1+" V2="+v2);
                 System.out.println((new Date())+": "+Math.atan2(b2.y - b1.y, b2.x - b1.x) * 180 / Math.PI);//double angle = ;
                 //math, send in different directions
             }
