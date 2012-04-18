@@ -34,7 +34,7 @@ public class DummyModel implements IBouncingBallsModel {
     @Override
     public List<Ball> getBalls() {
         List<Ball> balls = new LinkedList<Ball>();
-        Ball b = new Ball(r, vx, vy);
+        Ball b = new Ball(r, x, y, vx, vy, 1);
         balls.add(b);
         return balls;
     }

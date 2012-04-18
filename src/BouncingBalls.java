@@ -5,6 +5,7 @@ import java.awt.Label;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 
 import javax.swing.JDialog;
@@ -59,12 +60,17 @@ public final class BouncingBalls extends Animator {
         g.translate(0, -modelHeight);
 
         List<Ball> balls = Collections.synchronizedList(model.getBalls());;        
-        for (Ball b : balls) {
-            if (model.isCollisionHighlighting() && model.intersects(b)) {
-                g.setColor(Color.RED);
-            }
-            g.fill(b.getEllipse());
-            g.setColor(Color.GREEN);
+        try {
+            for (Ball b : balls) {
+                if (model.isCollisionHighlighting() && model.intersects(b) != null) {
+                    g.setColor(Color.RED);
+                }
+                g.fill(b.getEllipse());
+                g.setColor(Color.GREEN);
+            }   
+        } catch (ConcurrentModificationException cme) {
+            // Thread crash, doesn't really matter
+            System.err.println("Concurrent modification!");
         }
     }
 
