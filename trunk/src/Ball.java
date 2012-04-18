@@ -4,14 +4,15 @@ public class Ball {
     // x, y: positions
     // vx, vy: speeds/directions
     // r: ball radius
-    public double radius, x, y, vx, vy;
+    public double radius, x, y, vx, vy, x0, y0, mass;
 
-    public Ball(double radius, double x, double y) {
+    public Ball(double radius, double x, double y, double vx, double vy, double mass) {
         this.radius = radius;
-        this.x = x;
-        this.y = y;
-        this.vx = 2.3;
-        this.vy = 1;
+        this.x = this.x0 = x;
+        this.y = this.y0 = y;
+        this.vx = vx;
+        this.vy = vy;
+        this.mass = mass;
     }
 
     public Ellipse2D getEllipse() {
