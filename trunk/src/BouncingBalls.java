@@ -36,6 +36,7 @@ public final class BouncingBalls extends Animator {
         modelHeight = canvasHeight / PIXELS_PER_METER;
         // model = new DummyModel(modelWidth, modelHeight);
         model = new GravityModel(modelWidth, modelHeight);
+        ballAddPanel.setModel(model);
         canvas.addKeyListener(new AddBallKeyListener(model));
         
         JOptionPane.showMessageDialog(this.getContentPane(), 

@@ -26,5 +26,5 @@ public interface IBouncingBallsModel {
      */
     public void tick(double deltaT);
 
-    public void addBall();
+    public boolean addBall();
 }

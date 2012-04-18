@@ -40,6 +40,7 @@ public class DummyModel implements IBouncingBallsModel {
     }
 
     @Override
-    public void addBall() {
+    public boolean addBall() {
+        return false;
     }
 }
