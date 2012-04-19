@@ -1,15 +1,11 @@
 import java.awt.Color;
-import java.awt.Frame;
 import java.awt.Graphics2D;
-import java.awt.Label;
-import java.awt.geom.Area;
-import java.awt.geom.Ellipse2D;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 
-import javax.swing.JDialog;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 /**
@@ -21,7 +17,7 @@ import javax.swing.JOptionPane;
  * 
  */
 @SuppressWarnings("serial")
-public final class BouncingBalls extends Animator {
+public final class BouncingBalls extends Animator implements MouseListener {
 
     private static final double PIXELS_PER_METER = 30;
 
@@ -38,14 +34,15 @@ public final class BouncingBalls extends Animator {
         model = new GravityModel(modelWidth, modelHeight);
         ballAddPanel.setModel(model);
         canvas.addKeyListener(new AddBallKeyListener(model));
+        canvas.addMouseListener(this);
         
-        JOptionPane.showMessageDialog(this.getContentPane(), 
+        /*JOptionPane.showMessageDialog(this.getContentPane(), 
                 "<html>" +
                 "Controls:<br><br>" +
                 "Add new ball - SPACEBAR<br>" +
                 "Toggle collision highlighting - C<br>" +
                 "Clear all balls - DELETE<br>" +
-                "</html>");
+                "</html>");*/
     }
 
     @Override
@@ -56,7 +53,6 @@ public final class BouncingBalls extends Animator {
         // Update the model
         model.tick(deltaT);
         // Transform balls to fit canvas
-        g.setColor(Color.GREEN);
         g.scale(PIXELS_PER_METER, -PIXELS_PER_METER);
         g.translate(0, -modelHeight);
 
@@ -65,6 +61,8 @@ public final class BouncingBalls extends Animator {
             for (Ball b : balls) {
                 if (model.isCollisionHighlighting() && model.intersects(b) != null) {
                     g.setColor(Color.RED);
+                } else {
+                    g.setColor(b.color);
                 }
                 g.fill(b.getEllipse());
                 g.setColor(Color.GREEN);
@@ -81,5 +79,16 @@ public final class BouncingBalls extends Animator {
         // Update deltaT according to new frame rate
         deltaT = 1 / fps;
     }
+    
+    
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        ballAddPanel.setCoordinates(e.getX()/PIXELS_PER_METER, e.getY()/PIXELS_PER_METER);
+    }
+    
+    public void mouseEntered(MouseEvent e) {}
+    public void mouseExited(MouseEvent e) {}
+    public void mousePressed(MouseEvent e) {}
+    public void mouseReleased(MouseEvent e) {}
 
 }
