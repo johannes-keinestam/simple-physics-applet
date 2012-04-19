@@ -22,13 +22,13 @@ public final class BouncingBalls extends Animator implements MouseListener {
     private static final double PIXELS_PER_METER = 30;
 
     private GravityModel model;
-    private double modelHeight;
+    private double modelHeight, modelWidth;
     private double deltaT;
 
     @Override
     public void init() {
         super.init();
-        double modelWidth = canvasWidth / PIXELS_PER_METER;
+        modelWidth = canvasWidth / PIXELS_PER_METER;
         modelHeight = canvasHeight / PIXELS_PER_METER;
         // model = new DummyModel(modelWidth, modelHeight);
         model = new GravityModel(modelWidth, modelHeight);
@@ -83,7 +83,7 @@ public final class BouncingBalls extends Animator implements MouseListener {
     
     @Override
     public void mouseClicked(MouseEvent e) {
-        ballAddPanel.setCoordinates(e.getX()/PIXELS_PER_METER, e.getY()/PIXELS_PER_METER);
+        ballAddPanel.setCoordinates(e.getX()/PIXELS_PER_METER, modelHeight-(e.getY()/PIXELS_PER_METER));
     }
     
     public void mouseEntered(MouseEvent e) {}
