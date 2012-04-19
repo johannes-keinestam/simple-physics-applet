@@ -8,8 +8,8 @@ public class Ball {
     public final Color color;
     private static final double MINIMUM_MASS = 0.1;
     private static final double MAXIMUM_MASS = 5;
-    private static final Color HEAVY_COLOR = Color.RED;
-    private static final Color LIGHT_COLOR = Color.GREEN;
+    private static final Color HEAVY_COLOR = Color.BLACK;
+    private static final Color LIGHT_COLOR = Color.LIGHT_GRAY;
 
     public Ball(double radius, double x, double y, double vx, double vy, double mass) {
         this.radius = radius;
