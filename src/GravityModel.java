@@ -1,10 +1,11 @@
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.geom.Area;
-import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 public class GravityModel implements IBouncingBallsModel {
     private final double areaWidth;
@@ -12,7 +13,8 @@ public class GravityModel implements IBouncingBallsModel {
     private final List<Ball> balls = Collections
             .synchronizedList(new LinkedList<Ball>());
     private boolean collisionHighlighting = false;
-    private static final float GRAVITY_ACC = 9.82f/500f;
+    private boolean roofEnabled = true;
+    private static final float GRAVITY_ACC = 9.82f / 500f;
 
     public GravityModel(double width, double height) {
         this.areaWidth = width;
@@ -34,7 +36,7 @@ public class GravityModel implements IBouncingBallsModel {
     }
 
     public boolean addBall() {
-        return addBall(new Ball(1, areaWidth*0.4, areaHeight*0.8, 1, 0, 1));
+        return addBall(new Ball(1, areaWidth * 0.4, areaHeight * 0.8, 1, 0, 1));
     }
 
     public boolean addBall(Ball b) {
@@ -47,7 +49,7 @@ public class GravityModel implements IBouncingBallsModel {
             return false;
         }
     }
-    
+
     /**
      * Checks whether the two specified balls intersect.
      * 
@@ -66,7 +68,7 @@ public class GravityModel implements IBouncingBallsModel {
             return !a1.isEmpty();
         }
     }
-    
+
     /**
      * Checks whether specified ball intersects with any other ball.
      * 
@@ -74,24 +76,28 @@ public class GravityModel implements IBouncingBallsModel {
      * @return
      */
     public Ball intersects(Ball b) {
-        for (Ball b2 : balls) {
-            if (intersects(b, b2)) return b2; 
-        } 
+        // fetches list to get copy; avoids concurrentmodificationexception
+        for (Ball b2 : getBalls()) {
+            if (intersects(b, b2))
+                return b2;
+        }
         return null;
     }
-    
+
     public List<List<Ball>> getBallCollisions() {
-        List<Ball> cBalls = Collections.synchronizedList(new LinkedList<Ball>(balls));
+        List<Ball> cBalls = Collections.synchronizedList(new LinkedList<Ball>(
+                balls));
         ArrayList<List<Ball>> collisions = new ArrayList<List<Ball>>();
-        
+
         boolean collisionsDetected = false;
         while (!cBalls.isEmpty()) {
             Ball b = cBalls.get(0);
             Ball bCol = intersects(b);
-            
+
             if (bCol != null) {
                 ArrayList<Ball> c = new ArrayList<Ball>(2);
-                c.add(b); c.add(bCol);
+                c.add(b);
+                c.add(bCol);
                 collisions.add(c);
                 cBalls.remove(bCol);
                 collisionsDetected = true;
@@ -99,6 +105,30 @@ public class GravityModel implements IBouncingBallsModel {
             cBalls.remove(0);
         }
         return collisionsDetected ? collisions : null;
+    }
+    
+    public void releaseRandomBalls(int amount) {
+        balls.clear();
+        
+        int releasedBalls = 0;
+        Random randomGen = new Random();
+        
+        while (releasedBalls != amount) {
+            double radius = 0.3+(Math.min(randomGen.nextDouble(), randomGen.nextDouble()))*2.0;
+            double x = areaWidth*randomGen.nextDouble();
+            double y = areaHeight*randomGen.nextDouble();
+            double vx = 40*randomGen.nextDouble() - 20;
+            double vy = 40*randomGen.nextDouble() - 20;
+            double mass = 0.1+randomGen.nextDouble()*5;
+            
+            if (x < radius) x = radius;
+            else if (x > areaWidth-radius) x = areaWidth-radius;
+            if (y < radius) y = radius;
+            else if (y > areaHeight-radius) y = areaHeight-radius;
+            
+            Ball randomBall = new Ball(radius, x, y, vx, vy, mass);
+            if (addBall(randomBall)) releasedBalls++;
+        }
     }
 
     /**
@@ -112,63 +142,48 @@ public class GravityModel implements IBouncingBallsModel {
         List<List<Ball>> collisions = getBallCollisions();
         if (collisions != null) {
             for (List<Ball> collision : collisions) {
-                //separate balls
-                Ball b1 = collision.get(0); Ball b2 = collision.get(1);
-                
-                //b1.vx *= -1; b1.vy *= -1;
-                //b2.vx *= -1; b2.vy *= -1;
-                double theta1 = Math.atan2(b2.y - b1.y, b2.x - b1.x);
-                double theta2 = Math.atan2(b1.y - b2.y, b1.x - b2.x);
-                System.out.println("Theta1="+theta1+" ("+Math.toDegrees(theta1)+") "+", theta2="+theta2+" ("+Math.toDegrees(theta2)+") ");
-                
-                // TODO initial speed vector, using some kind of rectToPolar 
-                double u1 = b1.vx*Math.cos(theta2)+b1.vy*Math.sin(theta2);
-                double u2 = b2.vx*Math.cos(theta2)+b2.vy*Math.sin(theta2);
-                double m1 = b1.mass; double m2 = b2.mass;
-                
-                //double I = m1*u1 + m2*u2;
-                //double R = -1*(u2-u1);
-                
+                Ball b1 = collision.get(0);
+                Ball b2 = collision.get(1);
+
+                double theta = Math.atan2(b1.y - b2.y, b1.x - b2.x);
+
+                double u1 = b1.vx * Math.cos(theta) + b1.vy * Math.sin(theta);
+                double u2 = b2.vx * Math.cos(theta) + b2.vy * Math.sin(theta);
+                double m1 = b1.mass;
+                double m2 = b2.mass;
+
                 double v1;
                 double v2;
-                if (m1 == m2 || m2/m1 == 1) { // needed?
+                if (m1 == m2 || m2 / m1 == 1) { // needed?
                     v1 = u2;
                     v2 = u1;
                 } else {
-                    v1 = (u1*(m1-m2) + 2*m2*u2)/(m1+m2);
-                    v2 = (u2*(m2-m1) + 2*m1*u1)/(m1+m2);
+                    v1 = (u1 * (m1 - m2) + 2 * m2 * u2) / (m1 + m2);
+                    v2 = (u2 * (m2 - m1) + 2 * m1 * u1) / (m1 + m2);
                 }
-                
-                // TODO finished speed vector, back to cartesian (polarToRect)
-                double vy1 = v1*Math.sin(theta2); double vx1 = v1*Math.cos(theta2);
-                double vy2 = v2*Math.sin(theta2); double vx2 = v2*Math.cos(theta2);
-                
-                b1.vy = vy1; b1.vx = vx1;
-                b2.vy = vy2; b2.vx = vx2;
-                
-                //separate balls correctly
-                while (intersects(b1, b2)) {
-                    b1.y += b1.vy*deltaT;
-                    b1.x += b1.vx*deltaT;
-                    
-                    b2.y += b2.vy*deltaT;
-                    b2.x += b2.vx*deltaT;
-                }
-                
-                System.out.println("V1="+v1+" V2="+v2);
-                System.out.println((new Date())+": "+Math.atan2(b2.y - b1.y, b2.x - b1.x) * 180 / Math.PI);//double angle = ;
-                //math, send in different directions
+
+                double vy1 = v1 * Math.sin(theta);
+                double vx1 = v1 * Math.cos(theta);
+                double vy2 = v2 * Math.sin(theta);
+                double vx2 = v2 * Math.cos(theta);
+
+                b1.vy = vy1;
+                b1.vx = vx1;
+                b2.vy = vy2;
+                b2.vx = vx2;
+
+                // separate balls correctly
+                separateBalls(b1, b2, deltaT);
             }
         }
-        
-        // TODO do math here
+
         for (Ball b : balls) {
-            //Gravity
-            //System.out.println("X="+b.x+", Y="+b.y+", VX="+b.vx+", VY="+b.vy);
+            // Gravity
+            // System.out.println("X="+b.x+", Y="+b.y+", VX="+b.vx+", VY="+b.vy);
             b.vy += -GRAVITY_ACC;
-            //No change in x axis
+            // No change in x axis
             b.vx += 0;
-            
+
             if (b.x < b.radius || b.x > areaWidth - b.radius) {
                 b.vx *= -1;
                 if (b.x < b.radius) {
@@ -177,92 +192,34 @@ public class GravityModel implements IBouncingBallsModel {
                     b.x = areaWidth - b.radius;
                 }
             }
-            if (b.y < b.radius /*|| b.y > areaHeight - b.radius*/) {
+            if (b.y < b.radius) {
                 b.vy *= -1;
-                if (b.y < b.radius) {
-                    b.y = b.radius;
-                } else {
-                    b.y = areaHeight - b.radius;
-                }
-            }
-            
-            b.y += b.vy*deltaT;
-            b.x += b.vx*deltaT;
-            
-            
-            
-            /**System.out.print("X="+b.x+", Y="+b.y+", VX="+b.vx+", VY="+b.vy+" || ");
-            double air_friction = 1;
-            double x_prev = b.x;
-            double y_prev = b.y;
-            double vx_prev = b.vx;
-            double vy_prev = b.vy;
-            
-            double ax = -air_friction*vx_prev*vx_prev;
-            double ay = -air_friction*vy_prev*vy_prev - GRAVITY_ACC;
-
-            // Update velocity
-            b.vx = vx_prev + ax*deltaT;
-            b.vy = vy_prev + ay*deltaT;
-
-            // Update position
-            b.x = x_prev + vx_prev*deltaT + 0.5*ax*deltaT*deltaT;
-            b.y = y_prev + vy_prev*deltaT + 0.5*ay*deltaT*deltaT;
-            
-            System.out.println("X="+b.x+", Y="+b.y+", VX="+b.vx+", VY="+b.vy);
-            if (b.x < b.radius || b.x > areaWidth - b.radius) {
-                b.vx *= -1;
-                if (b.x < b.radius) {
-                    b.x = b.radius;
-                } else {
-                    b.x = areaWidth - b.radius;
-                }
-            }
-            if (b.y < b.radius || b.y > areaHeight - b.radius) {
+                b.y = b.radius;
+            } else if (roofEnabled && b.y > areaHeight - b.radius) {
                 b.vy *= -1;
-                if (b.y < b.radius) {
-                    b.y = b.radius;
-                } else {
-                    b.y = areaHeight - b.radius;
-                } 
-            }*/
-            /*if (b.x - b.radius < 0) {
-                System.out.println("Hit left wall");
-                b.x = b.radius;              // Place ball against edge
-                b.vx = -(b.vx * air_friction);
-            }
-            else if (b.x + b.radius > areaWidth) // Right Wall?
-            {
-                System.out.println("Hit right wall");
-                b.x = areaWidth - b.radius;     // Place ball against edge
-                b.vx = -(b.vx * air_friction);
-            }
-            
-            if (b.y - b.radius < 0)              // Bottom Wall?
-            {
-                System.out.println("Hit bottom wall");
-                b.y = b.radius;              // Place ball against edge
-                b.vy = -(b.vy * air_friction);
-            }
-            else if (b.y + b.radius > areaHeight) // Top Wall?
-            {
-                System.out.println("Hit top wall");
-                b.y = areaHeight - b.radius;     // Place ball against edge
-                b.vy = -(b.vy * air_friction);
+                b.y = areaHeight - b.radius;
             }
 
-            
-            
-            //b.x += b.vx * deltaT + GRAVITY_ACC * 0.5 * deltaT * deltaT;
-            //b.vx += GRAVITY_ACC * deltaT;
-
-            //b.y += b.vy * deltaT + GRAVITY_ACC * 0.5 * deltaT * deltaT;
-            //b.vy += GRAVITY_ACC * deltaT;
+            b.y += b.vy * deltaT;
             b.x += b.vx * deltaT;
-            b.y += b.vy * deltaT;*/
         }
     }
     
+    private void separateBalls(Ball b1, Ball b2, double deltaT) {
+        while (intersects(b1, b2)) {
+            b1.y += b1.vy * deltaT;
+            b1.x += b1.vx * deltaT;
+
+            b2.y += b2.vy * deltaT;
+            b2.x += b2.vx * deltaT;
+        }
+        
+        Ball newCollision1 = intersects(b1);
+        Ball newCollision2 = intersects(b2);
+        if (newCollision1 != null) separateBalls(b1, newCollision1, deltaT);
+        if (newCollision2 != null) separateBalls(b2, newCollision2, deltaT);
+    }
+
     public boolean isCollisionHighlighting() {
         return collisionHighlighting;
     }
@@ -270,7 +227,15 @@ public class GravityModel implements IBouncingBallsModel {
     public void setCollisionHighlighting(boolean collisionHighlighting) {
         this.collisionHighlighting = collisionHighlighting;
     }
-    
+
+    public boolean isRoofEnabled() {
+        return roofEnabled;
+    }
+
+    public void setRoofEnabled(boolean roofEnabled) {
+        this.roofEnabled = roofEnabled;
+    }
+
     public void clearBalls() {
         balls.clear();
     }

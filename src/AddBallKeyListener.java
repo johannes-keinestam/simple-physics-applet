@@ -21,19 +21,19 @@ public class AddBallKeyListener implements KeyListener {
         if (key == KeyEvent.VK_SPACE
                 && currTime > (lastBallTime + ADD_BALL_LIMIT_MS)) {
             lastBallTime = currTime;
-            model.addBall();
+            //model.addBall();
+            model.releaseRandomBalls(10);
         } else if (key == KeyEvent.VK_C) {
             model.setCollisionHighlighting(!model.isCollisionHighlighting());
         } else if (key == KeyEvent.VK_DELETE) {
             model.clearBalls();
+        } else if (key == KeyEvent.VK_R) {
+            model.setRoofEnabled(!model.isRoofEnabled());
         }
     }
 
     // Unused overridden methods
-    public void keyTyped(KeyEvent e) {
-    }
-
-    public void keyReleased(KeyEvent e) {
-    }
+    public void keyTyped(KeyEvent e) {}
+    public void keyReleased(KeyEvent e) {}
 
 }

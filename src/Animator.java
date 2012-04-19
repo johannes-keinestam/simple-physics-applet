@@ -1,12 +1,8 @@
 import java.awt.BorderLayout;
 import java.awt.Canvas;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Graphics2D;
-import java.awt.Label;
 import java.awt.LayoutManager;
-import java.awt.Panel;
-import java.awt.TextField;
 import java.awt.image.BufferStrategy;
 
 import javax.swing.JApplet;
