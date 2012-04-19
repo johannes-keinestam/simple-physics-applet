@@ -56,6 +56,7 @@ public class GravityModel implements IBouncingBallsModel {
      * @return
      */
     public boolean intersects(Ball b1, Ball b2) {
+        // TODO b1.radius + b2.radius >= dist between balls x,y ?
         if (b1 == b2) {
             return false;
         } else {
@@ -80,7 +81,7 @@ public class GravityModel implements IBouncingBallsModel {
     }
     
     public List<List<Ball>> getBallCollisions() {
-        List<Ball> cBalls = new LinkedList<Ball>(balls);
+        List<Ball> cBalls = Collections.synchronizedList(new LinkedList<Ball>(balls));
         ArrayList<List<Ball>> collisions = new ArrayList<List<Ball>>();
         
         boolean collisionsDetected = false;
@@ -114,20 +115,45 @@ public class GravityModel implements IBouncingBallsModel {
                 //separate balls
                 Ball b1 = collision.get(0); Ball b2 = collision.get(1);
                 
-                b1.vx *= -1; b1.vy *= -1;
-                b2.vx *= -1; b2.vy *= -1;
-                double theta1 = Math.atan2(b2.y - b1.y, b2.x - b1.x) * 180 / Math.PI;
-                double theta2 = Math.atan2(b1.y - b2.y, b1.x - b2.x) * 180 / Math.PI;
+                //b1.vx *= -1; b1.vy *= -1;
+                //b2.vx *= -1; b2.vy *= -1;
+                double theta1 = Math.atan2(b2.y - b1.y, b2.x - b1.x);
+                double theta2 = Math.atan2(b1.y - b2.y, b1.x - b2.x);
+                System.out.println("Theta1="+theta1+" ("+Math.toDegrees(theta1)+") "+", theta2="+theta2+" ("+Math.toDegrees(theta2)+") ");
                 
                 // TODO initial speed vector, using some kind of rectToPolar 
-                double u1 = 10; double u2 = 12;
-                double m1 = 2.5/*b1.mass*/; double m2 = 5.7/*b2.mass*/;
-                                
-                double I = m1*u1 + m2*u2;
-                double R = -1*(u2-u1);
+                double u1 = b1.vx*Math.cos(theta2)+b1.vy*Math.sin(theta2);
+                double u2 = b2.vx*Math.cos(theta2)+b2.vy*Math.sin(theta2);
+                double m1 = b1.mass; double m2 = b2.mass;
                 
-                double v1 = (u1*(m1-m2) + 2*m2*u2)/(m1+m2);
-                double v2 = (u2*(m2-m1) + 2*m1*u1)/(m1+m2);
+                //double I = m1*u1 + m2*u2;
+                //double R = -1*(u2-u1);
+                
+                double v1;
+                double v2;
+                if (m1 == m2 || m2/m1 == 1) { // needed?
+                    v1 = u2;
+                    v2 = u1;
+                } else {
+                    v1 = (u1*(m1-m2) + 2*m2*u2)/(m1+m2);
+                    v2 = (u2*(m2-m1) + 2*m1*u1)/(m1+m2);
+                }
+                
+                // TODO finished speed vector, back to cartesian (polarToRect)
+                double vy1 = v1*Math.sin(theta2); double vx1 = v1*Math.cos(theta2);
+                double vy2 = v2*Math.sin(theta2); double vx2 = v2*Math.cos(theta2);
+                
+                b1.vy = vy1; b1.vx = vx1;
+                b2.vy = vy2; b2.vx = vx2;
+                
+                //separate balls correctly
+                while (intersects(b1, b2)) {
+                    b1.y += b1.vy*deltaT;
+                    b1.x += b1.vx*deltaT;
+                    
+                    b2.y += b2.vy*deltaT;
+                    b2.x += b2.vx*deltaT;
+                }
                 
                 System.out.println("V1="+v1+" V2="+v2);
                 System.out.println((new Date())+": "+Math.atan2(b2.y - b1.y, b2.x - b1.x) * 180 / Math.PI);//double angle = ;
