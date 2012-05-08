@@ -17,11 +17,11 @@ public class Ball {
         this.y = y;
         this.vx = vx;
         this.vy = vy;
-        this.mass = mass;
+        this.mass = (mass < MAXIMUM_MASS) ? ((mass > MINIMUM_MASS) ? mass : MINIMUM_MASS) : MAXIMUM_MASS;
         
         // From http://www.java2s.com/Code/Java/2D-Graphics-GUI/Commoncolorutilities.htm
         double colorRange = MAXIMUM_MASS - MINIMUM_MASS;
-        double relativeMass = mass - MINIMUM_MASS;
+        double relativeMass = this.mass - MINIMUM_MASS;
         float r = (float)relativeMass / (float)colorRange;
         float ir = (float) 1 - r;
         float rgb1[] = new float[3];

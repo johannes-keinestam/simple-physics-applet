@@ -14,7 +14,7 @@ public class GravityModel implements IBouncingBallsModel {
             .synchronizedList(new LinkedList<Ball>());
     private boolean collisionHighlighting = false;
     private boolean roofEnabled = true;
-    private static final float GRAVITY_ACC = 9.82f / 500f;
+    private static final float GRAVITY_ACC = 9.82f / 60f;
 
     public GravityModel(double width, double height) {
         this.areaWidth = width;
@@ -62,10 +62,12 @@ public class GravityModel implements IBouncingBallsModel {
         if (b1 == b2) {
             return false;
         } else {
-            Area a1 = new Area(b1.getEllipse());
+            double distance = Math.sqrt(Math.pow(b1.x - b2.x, 2) + Math.pow(b1.y - b2.y, 2));
+            return (distance <= b1.radius + b2.radius); 
+            /*Area a1 = new Area(b1.getEllipse());
             Area a2 = new Area(b2.getEllipse());
             a1.intersect(a2);
-            return !a1.isEmpty();
+            return !a1.isEmpty();*/
         }
     }
 
@@ -91,7 +93,7 @@ public class GravityModel implements IBouncingBallsModel {
 
         boolean collisionsDetected = false;
         while (!cBalls.isEmpty()) {
-            Ball b = cBalls.get(0);
+            Ball b = cBalls.remove(0);
             Ball bCol = intersects(b);
 
             if (bCol != null) {
@@ -102,7 +104,6 @@ public class GravityModel implements IBouncingBallsModel {
                 cBalls.remove(bCol);
                 collisionsDetected = true;
             }
-            cBalls.remove(0);
         }
         return collisionsDetected ? collisions : null;
     }
@@ -114,11 +115,11 @@ public class GravityModel implements IBouncingBallsModel {
         Random randomGen = new Random();
         
         while (releasedBalls != amount) {
-            double radius = 0.3+(Math.min(randomGen.nextDouble(), randomGen.nextDouble()))*2.0;
+            double radius = 0.3+(Math.max(randomGen.nextDouble(), randomGen.nextDouble()))*3.0;
             double x = areaWidth*randomGen.nextDouble();
             double y = areaHeight*randomGen.nextDouble();
-            double vx = 40*randomGen.nextDouble() - 20;
-            double vy = 40*randomGen.nextDouble() - 20;
+            double vx = 10*Math.max(randomGen.nextDouble(), randomGen.nextDouble()) - 5;
+            double vy = 10*Math.max(randomGen.nextDouble(), randomGen.nextDouble()) - 5;
             double mass = 0.1+randomGen.nextDouble()*5;
             
             if (x < radius) x = radius;
@@ -145,28 +146,29 @@ public class GravityModel implements IBouncingBallsModel {
                 Ball b1 = collision.get(0);
                 Ball b2 = collision.get(1);
 
+                // http://en.wikipedia.org/wiki/Rotation_matrix#In_two_dimensions
+                
+                // calculate angle of impact for balls b1 and b2
                 double theta = Math.atan2(b1.y - b2.y, b1.x - b2.x);
 
-                double u1 = b1.vx * Math.cos(theta) + b1.vy * Math.sin(theta);
-                double u2 = b2.vx * Math.cos(theta) + b2.vy * Math.sin(theta);
+                // rotate velocities from x, y to new coordinate system p, q
+                double vp1 = b1.vx * Math.cos(theta) - b1.vy * Math.sin(theta);
+                double vp2 = b2.vx * Math.cos(theta) - b2.vy * Math.sin(theta);
+                double vq1 = b1.vx * Math.sin(theta) + b1.vy * Math.cos(theta);
+                double vq2 = b2.vx * Math.sin(theta) + b2.vy * Math.cos(theta);
                 double m1 = b1.mass;
                 double m2 = b2.mass;
 
-                double v1;
-                double v2;
-                if (m1 == m2 || m2 / m1 == 1) { // needed?
-                    v1 = u2;
-                    v2 = u1;
-                } else {
-                    v1 = (u1 * (m1 - m2) + 2 * m2 * u2) / (m1 + m2);
-                    v2 = (u2 * (m2 - m1) + 2 * m1 * u1) / (m1 + m2);
-                }
+                // calculate new velocities from elastic collision in new coordinate system
+                double up1 = (vp1 * (m1 - m2) + 2 * m2 * vp2) / (m1 + m2);
+                double up2 = (vp2 * (m2 - m1) + 2 * m1 * vp1) / (m1 + m2);
 
-                double vy1 = v1 * Math.sin(theta);
-                double vx1 = v1 * Math.cos(theta);
-                double vy2 = v2 * Math.sin(theta);
-                double vx2 = v2 * Math.cos(theta);
-
+                // rotate new velocity back from p, q to x, y
+                double vx1 = up1 * Math.cos(-theta) - vq1 * Math.sin(-theta);
+                double vx2 = up2 * Math.cos(-theta) - vq2 * Math.sin(-theta);
+                double vy1 = up1 * Math.sin(-theta) + vq1 * Math.cos(-theta);
+                double vy2 = up2 * Math.cos(-theta) + vq2 * Math.sin(-theta);
+                
                 b1.vy = vy1;
                 b1.vx = vx1;
                 b2.vy = vy2;
