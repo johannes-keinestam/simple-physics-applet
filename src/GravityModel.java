@@ -167,7 +167,7 @@ public class GravityModel implements IBouncingBallsModel {
                 double vx1 = up1 * Math.cos(-theta) - vq1 * Math.sin(-theta);
                 double vx2 = up2 * Math.cos(-theta) - vq2 * Math.sin(-theta);
                 double vy1 = up1 * Math.sin(-theta) + vq1 * Math.cos(-theta);
-                double vy2 = up2 * Math.cos(-theta) + vq2 * Math.sin(-theta);
+                double vy2 = up2 * Math.sin(-theta) + vq2 * Math.cos(-theta);
                 
                 b1.vy = vy1;
                 b1.vx = vx1;
