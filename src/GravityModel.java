@@ -58,16 +58,11 @@ public class GravityModel implements IBouncingBallsModel {
      * @return
      */
     public boolean intersects(Ball b1, Ball b2) {
-        // TODO b1.radius + b2.radius >= dist between balls x,y ?
         if (b1 == b2) {
             return false;
         } else {
             double distance = Math.sqrt(Math.pow(b1.x - b2.x, 2) + Math.pow(b1.y - b2.y, 2));
             return (distance <= b1.radius + b2.radius); 
-            /*Area a1 = new Area(b1.getEllipse());
-            Area a2 = new Area(b2.getEllipse());
-            a1.intersect(a2);
-            return !a1.isEmpty();*/
         }
     }
 
@@ -120,7 +115,7 @@ public class GravityModel implements IBouncingBallsModel {
             double y = areaHeight*randomGen.nextDouble();
             double vx = 10*Math.max(randomGen.nextDouble(), randomGen.nextDouble()) - 5;
             double vy = 10*Math.max(randomGen.nextDouble(), randomGen.nextDouble()) - 5;
-            double mass = 0.1+randomGen.nextDouble()*5;
+            double mass = 0.1+Math.min(randomGen.nextDouble(), randomGen.nextDouble())*5;
             
             if (x < radius) x = radius;
             else if (x > areaWidth-radius) x = areaWidth-radius;
@@ -145,11 +140,11 @@ public class GravityModel implements IBouncingBallsModel {
             for (List<Ball> collision : collisions) {
                 Ball b1 = collision.get(0);
                 Ball b2 = collision.get(1);
-
+                
                 // http://en.wikipedia.org/wiki/Rotation_matrix#In_two_dimensions
                 
                 // calculate angle of impact for balls b1 and b2
-                double theta = Math.atan2(b1.y - b2.y, b1.x - b2.x);
+                /*double theta = Math.atan2(b1.y - b2.y, b1.x - b2.x);
 
                 // rotate velocities from x, y to new coordinate system p, q
                 double vp1 = b1.vx * Math.cos(theta) - b1.vy * Math.sin(theta);
@@ -159,20 +154,62 @@ public class GravityModel implements IBouncingBallsModel {
                 double m1 = b1.mass;
                 double m2 = b2.mass;
 
+                // velocity vectors from vx, vy (pythagora)
+                double v1 = Math.sqrt(b1.vx*b1.vx + b1.vy*b1.vy);
+                double v2 = Math.sqrt(b2.vx*b2.vx + b2.vy*b2.vy);
+                
                 // calculate new velocities from elastic collision in new coordinate system
-                double up1 = (vp1 * (m1 - m2) + 2 * m2 * vp2) / (m1 + m2);
-                double up2 = (vp2 * (m2 - m1) + 2 * m1 * vp1) / (m1 + m2);
+                double u1 = (v1 * (m1 - m2) + 2 * m2 * v2) / (m1 + m2);
+                double u2 = (v2 * (m2 - m1) + 2 * m1 * v1) / (m1 + m2);
+                
+                //
+                //double up1 = (vp1 * (m1 - m2) + 2 * m2 * vp2) / (m1 + m2);
+                //double up2 = (vp2 * (m2 - m1) + 2 * m1 * vp1) / (m1 + m2);
+
+                // vx, vy from velocity vectors (pythagora)                
+                vp1 = Math.sqrt(u1*u1 - b1.vy*b1.vy);
+                vq1 = Math.sqrt(u1*u1 - b1.vx*b1.vx);
+                vp2 = Math.sqrt(u2*u2 - b2.vy*b2.vy);
+                vq2 = Math.sqrt(u2*u2 - b2.vx*b2.vx);
 
                 // rotate new velocity back from p, q to x, y
-                double vx1 = up1 * Math.cos(-theta) - vq1 * Math.sin(-theta);
-                double vx2 = up2 * Math.cos(-theta) - vq2 * Math.sin(-theta);
-                double vy1 = up1 * Math.sin(-theta) + vq1 * Math.cos(-theta);
-                double vy2 = up2 * Math.sin(-theta) + vq2 * Math.cos(-theta);
+                double vx1 = vp1 * Math.cos(-theta) - vq1 * Math.sin(-theta);
+                double vx2 = vp2 * Math.cos(-theta) - vq2 * Math.sin(-theta);
+                double vy1 = vp1 * Math.sin(-theta) + vq1 * Math.cos(-theta);
+                double vy2 = vp2 * Math.sin(-theta) + vq2 * Math.cos(-theta);
                 
                 b1.vy = vy1;
                 b1.vx = vx1;
                 b2.vy = vy2;
-                b2.vx = vx2;
+                b2.vx = vx2;*/
+                
+                // find angle of collision
+                double theta = Math.atan2(b1.y - b2.y, b1.x - b2.x);
+                double m1 = b1.mass;
+                double m2 = b2.mass;
+                
+                // changing from vx, vy to velocity vectors using Pythagorean
+                // theorem (makes it easier to calculate later)
+                double v1 = Math.sqrt(b1.vx*b1.vx + b1.vy*b1.vy);
+                double v2 = Math.sqrt(b2.vx*b2.vx + b2.vy*b2.vy);
+                // direction vectors for balls
+                double d1 = Math.atan2(b1.vy, b1.vx);
+                double d2 = Math.atan2(b2.vy, b2.vx);
+                
+                // rotate coordinate system by theta radians
+                double ux1 = v1*Math.cos(d1 - theta);
+                double uy1 = v1*Math.sin(d1 - theta);
+                double ux2 = v2*Math.cos(d2 - theta);
+                double uy2 = v2*Math.sin(d2 - theta);
+                
+                double vx1 = (ux1 * (m1 - m2) + ux2 * (m2 + m2)) / (m1 + m2);
+                double vx2 = (ux1 * (m1 + m1) + ux2 * (m2 - m1)) / (m1 + m2);
+                
+                // rotate coordinate system back
+                b1.vx = vx1*Math.cos(theta) + uy1*Math.cos(theta+Math.PI/2);
+                b1.vy = vx1*Math.sin(theta) + uy1*Math.sin(theta+Math.PI/2);
+                b2.vx = vx2*Math.cos(theta) + uy2*Math.cos(theta+Math.PI/2);
+                b2.vy = vx2*Math.sin(theta) + uy2*Math.sin(theta+Math.PI/2);
 
                 // separate balls correctly
                 separateBalls(b1, b2, deltaT);
@@ -181,7 +218,7 @@ public class GravityModel implements IBouncingBallsModel {
 
         for (Ball b : balls) {
             // Gravity
-            // System.out.println("X="+b.x+", Y="+b.y+", VX="+b.vx+", VY="+b.vy);
+            //System.out.println("X="+b.x+", Y="+b.y+", VX="+b.vx+", VY="+b.vy);
             b.vy += -GRAVITY_ACC;
             // No change in x axis
             b.vx += 0;
