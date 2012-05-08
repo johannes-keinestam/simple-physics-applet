@@ -22,7 +22,7 @@ public class AddBallKeyListener implements KeyListener {
                 && currTime > (lastBallTime + ADD_BALL_LIMIT_MS)) {
             lastBallTime = currTime;
             //model.addBall();
-            model.releaseRandomBalls(10);
+            model.releaseRandomBalls(3);
         } else if (key == KeyEvent.VK_C) {
             model.setCollisionHighlighting(!model.isCollisionHighlighting());
         } else if (key == KeyEvent.VK_DELETE) {
